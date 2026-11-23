@@ -369,6 +369,15 @@ public class DefaultLauncher {
      * -Dlog4j.configurationFile=&lt;Your custom log4j configuration&gt;
      */
     protected void appendJvmArgs(CommandBuilder result) {
+    int heap = options.getMaxMemory() != null ? options.getMaxMemory() : 1024;
+    if (result.noneMatch(a -> a.startsWith("-XX:+Use") && a.endsWith("GC"))) {
+        if (heap <= 3072) {
+            result.addUnstableDefault("UseSerialGC", true);
+        } else {
+            result.addUnstableDefault("UseG1GC", true);
+            result.addUnstableDefault("MaxGCPauseMillis", "50");
+        }
+    }
     }
 
     private boolean isUsingLog4j() {
